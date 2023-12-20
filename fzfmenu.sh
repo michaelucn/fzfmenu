@@ -15,13 +15,14 @@ select_drun() {
 	app_dirs=( "/usr/share/applications" "$HOME/.local/share/applications" )
 	set -f
 	IFS=:
-	for dir in "${app_dirs[@]}"; do
+	(flatpak list --columns=application &&
+		for dir in "${app_dirs[@]}"; do
 		set +f;
 		[ -n "$dir" ] || dir=.
 		for file in "$dir"/*.desktop; do
 			[ -f "$file" ] && printf '%s\n' "${file##*/}"
 		done
-	done | fzf
+	done) | fzf
 }
 
 select_run() {
