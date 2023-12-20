@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-set -f;
-IFS=:;
 select_path() {
+	set -f;
+	IFS=:;
 	for dir in $PATH; do
 		set +f;
-		[ -n "$p" ] || p=.;
+		[ -n "$dir" ] || dir=.;
 		for file in "$dir"/.[.!]* "$dir"/..?* "$dir"/*; do
 			[ -f "$file" ] && [ -x "$file" ] && printf '%s\n' "${file##*/}"
 		done;
@@ -13,6 +13,19 @@ select_path() {
 select_run() {
 	read -d '' input
 	echo $input | fzf
+}
+
+select_drun() {
+	app_dirs=( "/usr/share/applications" "~/.local/share/applications" )
+	set -f
+	IFS=:
+	for dir in "${app_dirs[@]}"; do
+		set +f;
+		[ -n "$dir" ] || dir=.
+		for file in "$dir"/*.desktop; do
+			[ -f "$file" ] && printf '%s\n' "${file##*/}"
+		done
+	done | fzf
 }
 
 get_selection() {
@@ -24,6 +37,12 @@ get_selection() {
 run_selection() {
 	if selection=$( $1 ); then
 		exec "$selection";
+	fi
+}
+
+drun_selection() {
+	if selection=$( $1 ); then
+		gtk-launch "$selection";
 	fi
 }
 
@@ -42,6 +61,12 @@ while [ $# -gt 0 ]; do
 			exit;;
 		-r | --run)
 			run_selection "select_run"
+			exit;;
+		-d | --drun)
+			drun_selection "select_drun"
+			exit;;
+		-D | --drun-no-exec)
+			get_selection "select_drun"
 			exit;;
 		*)
 			echo "$1 is an invalid option."
