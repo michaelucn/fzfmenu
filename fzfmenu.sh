@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -f;
 IFS=:;
 get_selection() {
@@ -19,3 +18,13 @@ if selection=$( get_selection ); then
 		exec "$selection"
 	fi
 fi
+
+while [ $# -gt 0 ]; do
+	case $1 in
+		-h | --help)
+			echo "This is a dmenu-like tool that redirects to fzf for fuzzy-finding"
+			exit;;
+	esac
+	shift
+done
+
