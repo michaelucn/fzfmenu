@@ -1,18 +1,14 @@
 #!/usr/bin/env bash
 select_path() {
-	set -f;
-	IFS=:;
+	set -f
+	IFS=:
 	for dir in $PATH; do
-		set +f;
-		[ -n "$dir" ] || dir=.;
+		set +f
+		[ -n "$dir" ] || dir=.
 		for file in "$dir"/.[.!]* "$dir"/..?* "$dir"/*; do
 			[ -f "$file" ] && [ -x "$file" ] && printf '%s\n' "${file##*/}"
-		done;
+		done
 	done | fzf
-}
-select_run() {
-	read -d '' input
-	echo $input | fzf
 }
 
 select_drun() {
@@ -28,24 +24,16 @@ select_drun() {
 	done | fzf
 }
 
+select_run() {
+	read -d '' input
+	echo $input | fzf
+}
+
 get_selection() {
-	if selection=$( $1 ); then
-		echo "$selection";
+	if selection=$( $2 ); then
+		$1 "$selection"
 	fi
 }
-
-run_selection() {
-	if selection=$( $1 ); then
-		exec "$selection";
-	fi
-}
-
-drun_selection() {
-	if selection=$( $1 ); then
-		gtk-launch "$selection";
-	fi
-}
-
 if (( $# == 0 )); then
 	get_selection "select_run"
 	exit
@@ -57,16 +45,16 @@ while [ $# -gt 0 ]; do
 			echo "This is a dmenu-like tool that redirects to fzf for fuzzy-finding"
 			exit;;
 		-p | --path)
-			get_selection "select_path"
+			get_selection "echo" "select_path"
 			exit;;
 		-r | --run)
-			run_selection "select_run"
+			get_selection "exec" "select_run"
 			exit;;
 		-d | --drun)
-			drun_selection "select_drun"
+			get_selection "gtk-launch" "select_drun"
 			exit;;
 		-D | --drun-no-exec)
-			get_selection "select_drun"
+			get_selection "echo" "select_drun"
 			exit;;
 		*)
 			echo "$1 is an invalid option."
