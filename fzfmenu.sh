@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -f;
 IFS=:;
-get_selection() {
+select_path() {
 	for dir in $PATH; do
 		set +f;
 		[ -n "$p" ] || p=.;
@@ -10,13 +10,26 @@ get_selection() {
 		done;
 	done | fzf
 }
+select_run() {
+	read -d '' input
+	echo $input | fzf
+}
 
-if selection=$( get_selection ); then
-	if type -t swaymsg > /dev/null; then
+get_selection() {
+	if selection=$( $1 ); then
 		echo "$selection";
-	else
-		exec "$selection"
 	fi
+}
+
+run_selection() {
+	if selection=$( $1 ); then
+		exec "$selection";
+	fi
+}
+
+if (( $# == 0 )); then
+	get_selection "select_run"
+	exit
 fi
 
 while [ $# -gt 0 ]; do
@@ -24,6 +37,16 @@ while [ $# -gt 0 ]; do
 		-h | --help)
 			echo "This is a dmenu-like tool that redirects to fzf for fuzzy-finding"
 			exit;;
+		-p | --path)
+			get_selection "select_path"
+			exit;;
+		-r | --run)
+			run_selection "select_run"
+			exit;;
+		*)
+			echo "$1 is an invalid option."
+			echo "Try 'fzfmenu -h' to see which options you can use."
+			exit 1;;
 	esac
 	shift
 done
