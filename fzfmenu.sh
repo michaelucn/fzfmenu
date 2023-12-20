@@ -12,7 +12,7 @@ select_path() {
 }
 
 select_drun() {
-	app_dirs=( "/usr/share/applications" "~/.local/share/applications" )
+	app_dirs=( "/usr/share/applications" "$HOME/.local/share/applications" )
 	set -f
 	IFS=:
 	for dir in "${app_dirs[@]}"; do
@@ -34,6 +34,7 @@ get_selection() {
 		$1 "$selection"
 	fi
 }
+
 if (( $# == 0 )); then
 	get_selection "select_run"
 	exit
